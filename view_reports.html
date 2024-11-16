@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Reports</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles for the reports page */
+        .report-item {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navbar -->
+        <header class="bg-white shadow">
+            <div class="container mx-auto px-4 py-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">View Reports</h1>
+                <!-- Back Button with redirection -->
+                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="window.location.href='admin_dashboard.html'">Back to Dashboard</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <section class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">Reports Overview</h2>
+                
+                <!-- Filter and Search -->
+                <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="flex flex-col md:flex-row md:items-center">
+                        <label for="report-type" class="mr-2 font-semibold">Filter by Type:</label>
+                        <select id="report-type" class="bg-white border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="all">All</option>
+                            <option value="appointments">Appointments</option>
+                            <option value="health-metrics">Health Metrics</option>
+                            <option value="system-usage">System Usage</option>
+                        </select>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <input type="text" id="search" placeholder="Search Reports" class="bg-white border border-gray-300 rounded-lg px-4 py-2 w-full md:w-64" />
+                    </div>
+                </div>
+
+                <!-- Reports List -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-bold mb-4">Appointments Report</h3>
+                    <div class="report-item">
+                        <p class="font-semibold">Appointment Report for September 2024:</p>
+                        <p class="text-gray-600">Total Appointments: 150</p>
+                        <p class="text-gray-600">Completed: 120</p>
+                        <p class="text-gray-600">Pending: 20</p>
+                        <p class="text-gray-600">Cancelled: 10</p>
+                        <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="viewReport('appointments')">View Details</button>
+                    </div>
+
+                    <h3 class="text-xl font-bold mt-6 mb-4">Health Metrics Report</h3>
+                    <div class="report-item">
+                        <p class="font-semibold">Health Metrics Report for September 2024:</p>
+                        <p class="text-gray-600">Average Blood Pressure: 120/80 mmHg</p>
+                        <p class="text-gray-600">Average Heart Rate: 72 bpm</p>
+                        <p class="text-gray-600">Average BMI: 23</p>
+                        <button class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="viewReport('health-metrics')">View Details</button>
+                    </div>
+
+                    <h3 class="text-xl font-bold mt-6 mb-4">System Usage Report</h3>
+                    <div class="report-item">
+                        <p class="font-semibold">System Usage Report for September 2024:</p>
+                        <p class="text-gray-600">Total Logins: 5000</p>
+                        <p class="text-gray-600">Peak Usage Time: 2 PM - 4 PM</p>
+                        <p class="text-gray-600">System Downtime: 1 hour</p>
+                        <button class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" onclick="viewReport('system-usage')">View Details</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // JavaScript code to handle report actions
+        function viewReport(reportType) {
+            // Redirect to the report details page based on the report type
+            window.location.href = reportType + '_report.html';
+        }
+
+        // Filter reports based on type
+        document.getElementById('report-type').addEventListener('change', function () {
+            const type = this.value;
+            // Implement filter logic based on the selected type
+            console.log('Filtering reports by type: ' + type);
+        });
+
+        // Search reports
+        document.getElementById('search').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            // Implement search logic
+            console.log('Searching reports for query: ' + query);
+        });
+    </script>
+</body>
+
+</html>

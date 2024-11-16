@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+    <!-- Logout Confirmation Section -->
+    <div class="bg-white shadow-lg rounded-lg p-8 max-w-md mx-auto">
+        <h1 class="text-3xl font-bold text-red-600 mb-4 text-center">Are you sure you want to log out?</h1>
+        <p class="text-gray-600 mb-6 text-center">You will be logged out of your session and redirected to the home page. Make sure you have saved your progress.</p>
+
+        <!-- Buttons for confirmation -->
+        <div class="flex justify-around">
+            <!-- Logout Button -->
+            <button id="logout-button" class="bg-red-500 text-white font-semibold py-2 px-6 rounded hover:bg-red-600 transition duration-300">
+                Yes, Log me out
+            </button>
+            
+            <script>
+                // Redirect to index.html when the button is clicked
+                document.getElementById('logout-button').addEventListener('click', function() {
+                    window.location.href = 'index.html';
+                });
+            </script>
+            
+
+            <!-- Cancel Button -->
+            <button id="cancel-button" class="bg-gray-500 text-white font-semibold py-2 px-6 rounded hover:bg-gray-600 transition duration-300">
+                Cancel
+            </button>
+            
+            <script>
+                // Redirect based on the user type in the URL query parameter
+                document.getElementById('cancel-button').addEventListener('click', function() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const userType = urlParams.get('type'); // Get 'type' from the URL
+            
+                    if (userType === 'patient') {
+                        window.location.href = 'patient_dashboard.html';
+                    } else if (userType === 'provider') {
+                        window.location.href = 'provider_dashboard.html';
+                    } else {
+                        // Default to index or a generic dashboard if type isn't specified
+                        window.location.href = 'index.html';
+                    }
+                });
+            </script>
+            
+        </div>
+
+        <!-- Optional Tip Section -->
+        <div class="mt-6 bg-yellow-50 p-4 rounded-md border-l-4 border-yellow-400">
+            <p class="text-yellow-700 font-medium">Tip:</p>
+            <p class="text-yellow-600">You can stay logged in by closing this window or clicking the "Cancel" button.</p>
+        </div>
+    </div>
+</body>
+</html>

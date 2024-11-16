@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-r from-blue-100 to-blue-200 min-h-screen flex items-center justify-center">
+    <!-- Login Container -->
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-3xl font-bold text-blue-600 mb-6 text-center">Login to Your Account</h1>
+        <!-- Login Form -->
+        <form id="login-form">
+            <!-- Username Field -->
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 font-medium mb-2">Username</label>
+                <input type="text" id="username" name="username" class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter your username" required>
+            </div>
+
+            <!-- Password Field -->
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 font-medium mb-2">Password</label>
+                <input type="password" id="password" name="password" class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter your password" required>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="bg-blue-500 text-white font-semibold w-full py-3 rounded hover:bg-blue-600 transition duration-300">Login</button>
+        </form>
+
+        <!-- Divider -->
+        <div class="text-center my-4">
+            <span class="text-gray-400">or</span>
+        </div>
+
+        <!-- Alternative Login Options (Optional) -->
+        <button 
+    class="bg-red-500 text-white font-semibold w-full py-3 rounded hover:bg-red-600 transition duration-300 mb-4" 
+    onclick="window.location.href='register.html'">
+    Don't have an account? Register.
+</button>
+
+    
+
+        <!-- Forgot Password Link -->
+        <div class="mt-6 text-center">
+            <a href="forgot_password.html" class="text-blue-500 hover:underline">Forgot your password?</a>
+        </div>
+    </div>
+
+    <!-- Login Script -->
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.token);
+                    alert('Login successful');
+                    window.location.href = 'dashboard.html'; // Redirect to user dashboard
+                } else {
+                    alert('Login failed. Please check your credentials.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

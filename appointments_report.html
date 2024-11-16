@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles for the appointments report page */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .report-table th,
+        .report-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .report-table th {
+            background-color: #f7fafc;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navbar -->
+        <header class="bg-white shadow">
+            <div class="container mx-auto px-4 py-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">Appointments Report</h1>
+                <!-- Back Button with redirection -->
+                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="window.location.href='view_reports.html'">Back to Reports</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <section class="max-w-4xl mx-auto">
+
+                <!-- Search Bar -->
+                <div class="bg-white p-6 rounded-lg shadow mb-6">
+                    <input id="month-search" type="text" placeholder="Search by month (e.g., September)" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm" />
+                </div>
+
+                <!-- Report Table -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-bold mb-4">Detailed Appointment Records</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Health Provider</th>
+                                <th>Appointment Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-body">
+                            <!-- Sample Data Row 1 -->
+                            <tr>
+                                <td>John Doe</td>
+                                <td>Dr. Smith</td>
+                                <td>2024-09-12</td>
+                                <td>10:00 AM</td>
+                                <td>Completed</td>
+                                <td><button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="downloadReport('john_doe_appointment_september_2024.pdf')">Download</button></td>
+                            </tr>
+                            <!-- Sample Data Row 2 -->
+                            <tr>
+                                <td>Jane Roe</td>
+                                <td>Dr. Adams</td>
+                                <td>2024-09-13</td>
+                                <td>02:00 PM</td>
+                                <td>Missed</td>
+                                <td><button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="downloadReport('jane_roe_appointment_september_2024.pdf')">Download</button></td>
+                            </tr>
+                            <!-- Add more rows as needed -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // JavaScript code to handle downloading reports
+        function downloadReport(filename) {
+            // Trigger the file download
+            window.location.href = 'path/to/appointments_reports/' + filename;
+        }
+
+        // JavaScript code to handle month search filtering
+        document.getElementById('month-search').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#report-body tr');
+
+            rows.forEach(row => {
+                const dateCell = row.children[2].textContent; // Appointment Date
+                const month = new Date(dateCell).toLocaleString('default', { month: 'long' }).toLowerCase();
+
+                if (month.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

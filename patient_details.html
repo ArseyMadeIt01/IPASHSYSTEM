@@ -1,0 +1,164 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-6xl mx-auto">
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Patient Details</h1>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col lg:flex-row lg:space-x-6">
+
+            <!-- Vitals Monitoring Section (Left) -->
+            <div class="lg:w-1/3 mb-6 lg:mb-0">
+                <h3 class="text-lg font-semibold text-green-700 mb-2">Vitals Monitoring</h3>
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
+                    <p class="text-gray-700">Blood Pressure: 120/80 mmHg</p>
+                    <p class="text-gray-700">Heart Rate: 72 bpm</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <p class="text-gray-700">Blood Sugar: 90 mg/dL</p>
+                    <p class="text-gray-700">Temperature: 98.6°F</p>
+                </div>
+            </div>
+
+            <!-- Patient Symptoms Section (Center) -->
+            <div class="lg:w-1/3 mb-6 lg:mb-0">
+                <h3 class="text-lg font-semibold text-green-700 mb-2">Patient Symptoms</h3>
+                <div id="symptoms-list" class="bg-white p-4 rounded-lg shadow-sm h-full">
+                    <!-- Symptoms will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Lab Results Upload Section (Right) -->
+            <div class="lg:w-1/3 mt-6 lg:mt-0">
+                <h3 class="text-lg font-semibold text-green-700 mb-2">Upload Lab Results</h3>
+                <form id="lab-results-form" enctype="multipart/form-data">
+                    <input type="file" name="lab_result" class="bg-white border border-green-300 p-2 rounded mb-4 w-full" required />
+                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full">Upload Lab Results</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Prescription Management Section -->
+        <div id="prescription-management-section" class="mt-6 bg-yellow-50 p-6 rounded-lg shadow-sm">
+            <h2 class="text-xl font-semibold text-yellow-800 mb-4">Prescription Management</h2>
+            <div>
+                <h3 class="text-lg font-semibold text-yellow-700 mb-2">Current Prescriptions</h3>
+                <ul id="prescription-list" class="space-y-2 text-yellow-700">
+                    <li>Metformin - 500 mg, 1x daily</li>
+                    <li>Lisinopril - 10 mg, 1x daily</li>
+                </ul>
+                <!-- New Prescription Form -->
+                <div class="mt-4 flex justify-end"> <!-- Use flex to right-align -->
+                    <div class="max-w-sm"> <!-- Limit the width of the form -->
+                        <input id="medication-name" type="text" placeholder="Medication Name" class="border border-yellow-300 p-2 rounded mb-2 w-full" />
+                        <input id="medication-dose" type="text" placeholder="Dosage (e.g., 500 mg)" class="border border-yellow-300 p-2 rounded mb-2 w-full" />
+                        <input id="medication-frequency" type="text" placeholder="Frequency (e.g., 1x daily)" class="border border-yellow-300 p-2 rounded mb-2 w-full" />
+                        <button id="add-prescription" class="bg-yellow-500 text-white px-4 py-2 mt-4 rounded hover:bg-yellow-600 w-full">Create New Prescription</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch symptoms from the database and display them in the symptoms list
+        fetch('fetch-symptoms.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const symptomsList = document.getElementById('symptoms-list');
+                    data.data.forEach(symptom => {
+                        const symptomItem = document.createElement('div');
+                        symptomItem.classList.add('p-2', 'bg-green-50', 'rounded', 'shadow-sm', 'mb-2');
+                        symptomItem.textContent = symptom.symptom_description; // Ensure this column matches your database
+                        symptomsList.appendChild(symptomItem);
+                    });
+                } else {
+                    console.error('Error fetching symptoms:', data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+        // Handle Lab Results Upload
+        document.getElementById('lab-results-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this); // Create a FormData object with the file
+            
+            fetch('upload-lab-result.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Lab result uploaded successfully!');
+                } else {
+                    alert('Error uploading lab result: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Handle Prescription Management
+        document.getElementById('add-prescription').addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            const medicationName = document.getElementById('medication-name').value.trim();
+            const medicationDose = document.getElementById('medication-dose').value.trim();
+            const medicationFrequency = document.getElementById('medication-frequency').value.trim();
+            
+            if (!medicationName || !medicationDose || !medicationFrequency) {
+                alert("Please fill in all fields.");
+                return;
+            }
+        
+            fetch('prescription-handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    medication_name: medicationName,
+                    medication_dose: medicationDose,
+                    medication_frequency: medicationFrequency
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Display the new prescription in the list without reloading
+                    const prescriptionList = document.getElementById('prescription-list');
+                    const newPrescription = document.createElement('li');
+                    newPrescription.textContent = `${medicationName} - ${medicationDose}, ${medicationFrequency}`;
+                    newPrescription.classList.add('text-yellow-700'); // Keep styles consistent
+                    
+                    prescriptionList.appendChild(newPrescription);
+
+                    // Clear the input fields
+                    document.getElementById('medication-name').value = '';
+                    document.getElementById('medication-dose').value = '';
+                    document.getElementById('medication-frequency').value = '';
+
+                    alert('Prescription added successfully!');
+                } else {
+                    alert('Error adding prescription: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the prescription. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>

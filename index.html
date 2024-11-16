@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Dashboard - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+    <div class="bg-white shadow-md rounded-lg w-full max-w-md p-8 space-y-8">
+        <h1 class="text-3xl font-semibold text-center text-blue-600">Welcome to IPASH SYSTEM</h1>
+        
+        <!-- Motto Section -->
+        <p class="text-center text-gray-600 italic">
+            "Empowering Health Through Accessible and Innovative Solutions"
+        </p>
+        
+        <!-- Tab Navigation -->
+        <div class="flex justify-center space-x-4 border-b border-gray-200 pb-4 mt-6">
+            <button id="patient-tab" class="px-4 py-2 font-semibold text-blue-600 hover:text-blue-600 focus:outline-none">
+                Patient
+            </button>
+            <button id="provider-tab" class="px-4 py-2 font-semibold text-red-600 hover:text-red-600 focus:outline-none">
+                Health Provider
+            </button>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="mt-8 text-gray-500 text-sm text-center">
+        <p>&copy; 2024 IPASH System. All rights reserved.</p>
+        <p class="mt-2">
+            Dedicated to enhancing patient-provider collaboration and promoting better healthcare management.
+        </p>
+    </footer>
+
+    <script>
+        // Redirect to login.html with the user type as a query parameter
+        document.getElementById('patient-tab').addEventListener('click', () => {
+            window.location.href = 'login.html?type=patient';
+        });
+
+        document.getElementById('provider-tab').addEventListener('click', () => {
+            window.location.href = 'login.html?type=provider';
+        });
+    </script>
+</body>
+</html>

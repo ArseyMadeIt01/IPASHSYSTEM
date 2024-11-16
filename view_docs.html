@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles for the documentation page */
+        .doc-item {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navbar -->
+        <header class="bg-white shadow">
+            <div class="container mx-auto px-4 py-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">View Documentation</h1>
+                <!-- Back Button with redirection -->
+                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="window.location.href='admin_dashboard.html'">Back to Dashboard</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <section class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">Available Documents</h2>
+                
+                <!-- Document List -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-bold mb-4">System Policies</h3>
+                    <div class="doc-item">
+                        <a href="docs/system_policy.pdf" class="text-blue-500 hover:underline">System Policy Document</a>
+                        <p class="text-gray-600 mt-2">Details about the system policies and compliance guidelines.</p>
+                    </div>
+                    <div class="doc-item">
+                        <a href="docs/privacy_policy.pdf" class="text-blue-500 hover:underline">Privacy Policy</a>
+                        <p class="text-gray-600 mt-2">Information about privacy practices and data protection.</p>
+                    </div>
+
+                    <h3 class="text-xl font-bold mt-6 mb-4">User Guides</h3>
+                    <div class="doc-item">
+                        <a href="docs/user_guide.pdf" class="text-blue-500 hover:underline">User Guide</a>
+                        <p class="text-gray-600 mt-2">Comprehensive guide for users on how to use the system.</p>
+                    </div>
+                    <div class="doc-item">
+                        <a href="docs/installation_guide.pdf" class="text-blue-500 hover:underline">Installation Guide</a>
+                        <p class="text-gray-600 mt-2">Instructions on installing and setting up the system.</p>
+                    </div>
+
+                    <h3 class="text-xl font-bold mt-6 mb-4">Training Materials</h3>
+                    <div class="doc-item">
+                        <a href="docs/training_materials.pdf" class="text-blue-500 hover:underline">Training Materials</a>
+                        <p class="text-gray-600 mt-2">Materials for training sessions and workshops.</p>
+                    </div>
+                    <div class="doc-item">
+                        <a href="docs/tutorials.pdf" class="text-blue-500 hover:underline">Tutorials</a>
+                        <p class="text-gray-600 mt-2">Step-by-step tutorials to help users get started.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

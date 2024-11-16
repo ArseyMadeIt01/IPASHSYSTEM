@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Video Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex flex-col items-center justify-center min-h-screen p-4">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">WebRTC Video Chat</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
+            <video id="localVideo" class="w-full rounded-lg shadow-lg border-4 border-blue-500" autoplay muted></video>
+            <video id="remoteVideo" class="w-full rounded-lg shadow-lg border-4 border-green-500" autoplay></video>
+        </div>
+
+        <button id="startButton" class="mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-500 transition duration-300">
+            Start Video Chat
+        </button>
+    </div>
+
+    <script>
+       const startButton = document.getElementById('startButton');
+const localVideo = document.getElementById('localVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+
+let localStream;
+let peerConnection;
+const iceServers = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' }, // STUN server for NAT traversal
+    ]
+};
+
+startButton.addEventListener('click', async () => {
+    startButton.disabled = true;
+
+    // Access local video/audio
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localVideo.srcObject = localStream;
+
+    // Set up peer connection
+    peerConnection = new RTCPeerConnection(iceServers);
+
+    // Add local stream tracks to the peer connection
+    localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+    });
+
+    // Listen for remote tracks
+    peerConnection.ontrack = event => {
+        remoteVideo.srcObject = event.streams[0];
+    };
+
+    // ICE Candidate handling
+    peerConnection.onicecandidate = event => {
+        if (event.candidate) {
+            // Send ICE candidate to the server
+            sendIceCandidate(event.candidate);
+        }
+    };
+
+    // Create and send offer
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    console.log('Offer created:', offer);
+
+    // Send the offer to the server
+    await sendOffer(offer);
+
+    // Check if there's an answer available
+    const answer = await getAnswer();
+    if (answer) {
+        await peerConnection.setRemoteDescription(answer);
+        console.log('Answer set from the remote peer:', answer);
+    }
+
+    // Retrieve and apply ICE candidates from the remote peer
+    const iceCandidates = await getIceCandidates();
+    iceCandidates.forEach(candidate => {
+        peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    });
+});
+
+// Function to send offer to the signaling server
+async function sendOffer(offer) {
+    await fetch('signaling.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'sendOffer',
+            offer: offer,
+        }),
+    });
+}
+
+// Function to get the answer from the signaling server
+async function getAnswer() {
+    const response = await fetch('signaling.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'getAnswer' }),
+    });
+    const data = await response.json();
+    return data.answer ? new RTCSessionDescription(data.answer) : null;
+}
+
+// Function to send ICE candidates to the signaling server
+async function sendIceCandidate(candidate) {
+    await fetch('signaling.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'sendIceCandidate',
+            candidate: candidate,
+        }),
+    });
+}
+
+// Function to get ICE candidates from the signaling server
+async function getIceCandidates() {
+    const response = await fetch('signaling.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'getIceCandidates' }),
+    });
+    const data = await response.json();
+    return data.candidates || [];
+}
+
+    </script>
+
+</body>
+</html>

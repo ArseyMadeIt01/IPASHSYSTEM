@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Smooth transition for form visibility */
+        .hidden-form {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .show-form {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-4xl">
+        <h1 class="text-3xl font-bold mb-6 text-center text-blue-600">User Registration</h1>
+        <div class="flex justify-center space-x-4 mb-6">
+            <button id="patient-btn" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 focus:outline-none">Register as Patient</button>
+            <button id="provider-btn" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 focus:outline-none">Register as Health Provider</button>
+            <button id="admin-btn" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 focus:outline-none">Register as Admin</button>
+        </div>
+
+        <!-- Patient Registration Form -->
+        <form id="patient-form" class="hidden-form patient-form">
+            <h2 class="form-header text-blue-600">Patient Registration</h2>
+            <label for="patient-name" class="block text-sm font-medium mb-1">Full Name</label>
+            <input type="text" id="patient-name" name="name" class="input-field" required>
+        
+            <label for="patient-email" class="block text-sm font-medium mb-1">Email</label>
+            <input type="email" id="patient-email" name="email" class="input-field" required>
+        
+            <label for="patient-phone" class="block text-sm font-medium mb-1">Phone Number</label>
+            <input type="tel" id="patient-phone" name="phone" class="input-field" required>
+        
+            <label for="patient-password" class="block text-sm font-medium mb-1">Password</label>
+            <input type="password" id="patient-password" name="password" class="input-field" required>
+        
+            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 focus:outline-none">Register as Patient</button>
+
+        </form>
+
+        <!-- Health Provider Registration Form -->
+        <form id="provider-form" class="hidden-form provider-form">
+            <h2 class="form-header text-green-600">Health Provider Registration</h2>
+            <label for="provider-name" class="block text-sm font-medium mb-1">Full Name</label>
+            <input type="text" id="provider-name" name="name" class="input-field" required>
+        
+            <label for="provider-email" class="block text-sm font-medium mb-1">Email</label>
+            <input type="email" id="provider-email" name="email" class="input-field" required>
+        
+            <label for="provider-phone" class="block text-sm font-medium mb-1">Phone Number</label>
+            <input type="tel" id="provider-phone" name="phone" class="input-field" required>
+        
+            <label for="provider-specialization" class="block text-sm font-medium mb-1">Specialization</label>
+            <input type="text" id="provider-specialization" name="specialization" class="input-field" required>
+        
+            <label for="provider-password" class="block text-sm font-medium mb-1">Password</label>
+            <input type="password" id="provider-password" name="password" class="input-field" required>
+        
+            <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 focus:outline-none">Register as Provider</button>
+        </form>
+
+        <!-- Admin Registration Form -->
+        <form id="admin-form" class="hidden-form admin-form">
+            <h2 class="form-header text-red-600">Admin Registration</h2>
+            <label for="admin-name" class="block text-sm font-medium mb-1">Full Name</label>
+            <input type="text" id="admin-name" name="name" class="input-field" required>
+
+            <label for="admin-email" class="block text-sm font-medium mb-1">Email</label>
+            <input type="email" id="admin-email" name="email" class="input-field" required>
+
+            <label for="admin-phone" class="block text-sm font-medium mb-1">Phone Number</label>
+            <input type="tel" id="admin-phone" name="phone" class="input-field" required>
+
+            <label for="admin-password" class="block text-sm font-medium mb-1">Password</label>
+            <input type="password" id="admin-password" name="password" class="input-field" required>
+
+            <button type="submit" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 focus:outline-none">Register as Admin</button>
+        </form>
+    </div>
+    <script>
+       // Function to submit form data via Fetch API
+function submitForm(formData) {
+    fetch('register_user.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message); // Show success message
+            // Redirect after successful registration
+            if (formData.user_type === 'patient') {
+                window.location.href = 'patient_dashboard.html';
+            } else if (formData.user_type === 'provider') {
+                window.location.href = 'provider_dashboard.html';
+            } else {
+                window.location.href = 'admin_dashboard.html';
+            }
+        } else {
+            alert('Error: ' + data.error); // Show error message
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('There was a problem with the registration process.');
+    });
+}
+
+// Patient form submission
+document.getElementById('patient-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = {
+        user_type: 'patient',
+        name: document.getElementById('patient-name').value,
+        email: document.getElementById('patient-email').value,
+        phone: document.getElementById('patient-phone').value,
+        password: document.getElementById('patient-password').value,
+    };
+    submitForm(formData);
+});
+
+// Health provider form submission
+document.getElementById('provider-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = {
+        user_type: 'provider',
+        name: document.getElementById('provider-name').value,
+        email: document.getElementById('provider-email').value,
+        phone: document.getElementById('provider-phone').value,
+        specialization: document.getElementById('provider-specialization').value,
+        password: document.getElementById('provider-password').value,
+    };
+    submitForm(formData);
+});
+
+// Admin form submission
+document.getElementById('admin-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = {
+        user_type: 'admin',
+        name: document.getElementById('admin-name').value,
+        email: document.getElementById('admin-email').value,
+        phone: document.getElementById('admin-phone').value,
+        password: document.getElementById('admin-password').value,
+    };
+    submitForm(formData);
+});
+
+// Toggle forms based on user selection (show/hide on click)
+document.getElementById('patient-btn').addEventListener('click', function() {
+    toggleForm('patient-form');
+});
+
+document.getElementById('provider-btn').addEventListener('click', function() {
+    toggleForm('provider-form');
+});
+
+document.getElementById('admin-btn').addEventListener('click', function() {
+    toggleForm('admin-form');
+});
+
+// Helper function to hide all forms
+function hideAllForms() {
+    document.getElementById('patient-form').classList.remove('show-form');
+    document.getElementById('provider-form').classList.remove('show-form');
+    document.getElementById('admin-form').classList.remove('show-form');
+}
+
+// Helper function to toggle the visibility of the selected form
+function toggleForm(formId) {
+    const form = document.getElementById(formId);
+    if (form.classList.contains('show-form')) {
+        form.classList.remove('show-form');
+    } else {
+        hideAllForms();
+        form.classList.add('show-form');
+    }
+}
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Feedback</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom styles for the feedback page */
+        .feedback-item {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .star-rating i {
+            color: #f59e0b; /* Gold color for stars */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navbar -->
+        <header class="bg-white shadow">
+            <div class="container mx-auto px-4 py-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">View Feedback</h1>
+                <!-- Back Button with redirection -->
+                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="window.location.href='admin_dashboard.html'">Back to Dashboard</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <section class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">Feedback Overview</h2>
+                
+                <!-- Filter and Search -->
+                <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="flex flex-col md:flex-row md:items-center">
+                        <label for="feedback-type" class="mr-2 font-semibold">Filter by Type:</label>
+                        <select id="feedback-type" class="bg-white border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="all">All</option>
+                            <option value="patient">Patient Feedback</option>
+                            <option value="provider">Provider Feedback</option>
+                        </select>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <input type="text" id="search" placeholder="Search Feedback" class="bg-white border border-gray-300 rounded-lg px-4 py-2 w-full md:w-64" />
+                    </div>
+                </div>
+
+                <!-- Feedback List -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-bold mb-4">Patient Feedback</h3>
+                    <div class="feedback-item">
+                        <p class="font-semibold">John Doe:</p>
+                        <div class="star-rating flex items-center mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p class="text-gray-600">The new appointment scheduling system is great, but I found it a bit confusing at first. Maybe a tutorial would help.</p>
+                        <div class="mt-2 flex justify-end">
+                            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="resolveFeedback(1)">Resolve</button>
+                        </div>
+                    </div>
+                    <div class="feedback-item">
+                        <p class="font-semibold">Jane Smith:</p>
+                        <div class="star-rating flex items-center mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p class="text-gray-600">I appreciate the new features added, but the website is sometimes slow. Please look into optimizing the performance.</p>
+                        <div class="mt-2 flex justify-end">
+                            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="resolveFeedback(2)">Resolve</button>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-bold mt-6 mb-4">Provider Feedback</h3>
+                    <div class="feedback-item">
+                        <p class="font-semibold">Dr. Emily White:</p>
+                        <div class="star-rating flex items-center mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p class="text-gray-600">The new prescription management tool is very helpful. However, it would be beneficial to have a bulk update feature.</p>
+                        <div class="mt-2 flex justify-end">
+                            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="resolveFeedback(3)">Resolve</button>
+                        </div>
+                    </div>
+                    <div class="feedback-item">
+                        <p class="font-semibold">Dr. Michael Brown:</p>
+                        <div class="star-rating flex items-center mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p class="text-gray-600">The communication system needs improvement. Sometimes messages are delayed or not delivered.</p>
+                        <div class="mt-2 flex justify-end">
+                            <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="resolveFeedback(4)">Resolve</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+    const feedbackContainer = document.querySelector(".bg-white.p-6.rounded-lg.shadow");
+    const feedbackTypeSelect = document.getElementById("feedback-type");
+    const searchInput = document.getElementById("search");
+
+    // Function to fetch feedbacks from the server
+    async function fetchFeedbacks() {
+        try {
+            const response = await fetch('view-feedback.php');
+            const feedbacks = await response.json();
+            displayFeedback(feedbacks);
+        } catch (error) {
+            console.error("Error fetching feedbacks:", error);
+        }
+    }
+
+    // Function to display feedbacks
+    function displayFeedback(feedbacks) {
+        feedbackContainer.innerHTML = "";
+
+        const filteredFeedbacks = feedbacks.filter(feedback => {
+            // Filter by feedback type
+            const typeFilter = feedbackTypeSelect.value;
+            if (typeFilter !== 'all' && feedback.user_type !== typeFilter) {
+                return false;
+            }
+
+            // Filter by search query
+            const query = searchInput.value.toLowerCase();
+            if (query && !feedback.name.toLowerCase().includes(query) && !feedback.feedback.toLowerCase().includes(query)) {
+                return false;
+            }
+
+            return true;
+        });
+
+        // Render feedback items
+        filteredFeedbacks.forEach(feedback => {
+            const feedbackDiv = document.createElement("div");
+            feedbackDiv.classList.add("feedback-item");
+
+            // Display feedback details
+            feedbackDiv.innerHTML = `
+                <p class="font-semibold">${feedback.name}:</p>
+                <div class="star-rating flex items-center mb-2">
+                    ${generateStarRating(feedback.rating)}
+                </div>
+                <p class="text-gray-600">${feedback.feedback}</p>
+                <div class="mt-2 flex justify-end">
+                    <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="resolveFeedback(${feedback.id})">Resolve</button>
+                </div>
+            `;
+            feedbackContainer.appendChild(feedbackDiv);
+        });
+    }
+
+    // Generate star rating HTML based on rating value
+    function generateStarRating(rating) {
+        let stars = "";
+        for (let i = 1; i <= 5; i++) {
+            stars += i <= rating ? `<i class="fas fa-star"></i>` : `<i class="far fa-star"></i>`;
+        }
+        return stars;
+    }
+
+    // Fetch and display feedbacks on page load
+    fetchFeedbacks();
+
+    // Filter feedback by type
+    feedbackTypeSelect.addEventListener("change", fetchFeedbacks);
+
+    // Search feedback
+    searchInput.addEventListener("input", fetchFeedbacks);
+
+    // Mock resolve feedback function (for example only)
+    window.resolveFeedback = async function(feedbackId) {
+    const confirmation = confirm("Are you sure you want to resolve this feedback?");
+    if (!confirmation) return;
+
+    try {
+        const response = await fetch('resolve_feedback.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ feedbackId })
+        });
+        
+        const result = await response.json();
+
+        if (result.success) {
+            alert("Thank you for your feedback and for letting us know where to improve. Have a nice day.\n\nRegards.");
+        } else {
+            alert("An error occurred while resolving the feedback.");
+        }
+    } catch (error) {
+        console.error("Error resolving feedback:", error);
+        alert("An error occurred while resolving the feedback.");
+    }
+};
+
+    </script>
+</body>
+</html>
