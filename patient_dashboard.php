@@ -1,3 +1,40 @@
+<?php
+    include_once "db.php";
+    session_start();
+    if(!isset($_SESSION['user'])) {
+        header("Location: index.html");
+        exit();
+    }
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (isset($_POST["id"])) {
+            $stmt = $db->prepare("UPDATE appointments SET status = 'cancelled' WHERE id = :id");
+            $stmt->bindParam(':id', $_POST["id"]);
+            $stmt->execute();
+        }
+    } 
+
+    $appointments = [];
+    $stmt = $db->prepare("SELECT * FROM appointments WHERE patient = :name AND (status = 'scheduled' OR status = 'accepted')");
+    $stmt->bindParam(':name', $_SESSION['user']);
+    $stmt->execute();
+    $allRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($allRows as $row) {
+        $appointment = [
+            'doctor_name' => $row['provider'] . ' - ' .$row['provider_specialization'],
+            'date' => $row['appointment_date'],
+            'time' => $row['appointment_time'],
+            'status' => $row['status'],
+            'id' => $row['id'],
+        ];
+        array_push($appointments, $appointment);
+    }
+    $stmt = $db->prepare("SELECT * FROM providers");
+    $stmt->execute();
+    $providers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,7 +105,7 @@
         <div class="dropdown relative">
             <button class="flex items-center space-x-2">
                 <img src="https://via.placeholder.com/40" alt="Profile" class="w-10 h-10 rounded-full">
-                <span class="font-medium text-gray-700">John Doe</span>
+                <span class="font-medium text-gray-700"><?php echo $_SESSION['user'];?></span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -77,10 +114,9 @@
             </button>
             <!-- Dropdown Content -->
             <div class="dropdown-content mt-2 rounded-lg shadow-lg">
-                <h2 class="text-lg font-semibold">John Doe</h2>
-                <p>Email: john.doe@example.com</p>
-                <p>Phone: +1 234 567 890</p>
-                <p>DOB: 01/01/1980</p>
+                <h2 class="text-lg font-semibold"><?php echo $_SESSION['user'];?></h2>
+                <p><?php echo $_SESSION['email'];?></p>
+                <p><?php echo $_SESSION['phone'];?></p>
                 <button id="editProfileBtn" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Edit Profile</button>
                 <a href="logout.html" class="mt-4 inline-block bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</a>
             </div>
@@ -93,20 +129,12 @@
     <h3 class="text-lg font-semibold mb-2">Edit Profile</h3>
     <form id="profileForm">
         <div class="mb-4">
-            <label class="block text-gray-700" for="name">Name</label>
-            <input class="border rounded w-full px-3 py-2" type="text" id="name" value="John Doe">
-        </div>
-        <div class="mb-4">
             <label class="block text-gray-700" for="email">Email</label>
             <input class="border rounded w-full px-3 py-2" type="email" id="email" value="john.doe@example.com">
         </div>
         <div class="mb-4">
             <label class="block text-gray-700" for="phone">Phone</label>
             <input class="border rounded w-full px-3 py-2" type="text" id="phone" value="+1 234 567 890">
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700" for="dob">Date of Birth</label>
-            <input class="border rounded w-full px-3 py-2" type="date" id="dob" value="1980-01-01">
         </div>
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Changes</button>
         <button type="button" id="cancelEdit" class="ml-2 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Cancel</button>
@@ -140,7 +168,7 @@
             <button id="appointments-tab" class="tab-button px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Appointments</button>
             <button id="health-data-tab" class="tab-button px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 ml-4">Health Data</button>
             <button id="communication-tab" class="tab-button px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 ml-4">Communication</button>
-            <button id="feedback-tab" class="tab-button px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 ml-4">Feedback</button>
+            <!-- <button id="feedback-tab" class="tab-button px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 ml-4">Feedback</button> -->
         </div>
 
         <!-- Appointments Section -->
@@ -153,12 +181,25 @@
         <!-- Appointment list on the left -->
         <div id="appointment-list" class="space-y-4">
             <!-- Placeholder appointment card -->
-            <div class="bg-gradient-to-r from-purple-100 to-purple-50 p-4 rounded-lg shadow-md">
-                <p class="text-lg font-semibold text-purple-900">Dr. Smith - Cardiologist</p>
-                <p class="text-sm text-purple-700">Date: 2024-08-15</p>
-                <p class="text-sm text-purple-700">Time: 10:00 AM</p>
-                <button class="mt-3 bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition-all duration-200">Cancel Appointment</button>
-            </div>
+             <?php
+                if (!empty($appointments)) {
+                    foreach ($appointments as $appointment) {
+                        echo '
+                        <form action="patient_dashboard.php" method ="post" class="bg-gradient-to-r from-purple-100 to-purple-50 p-4 rounded-lg shadow-md">
+                            <input name="id" type = "hidden" value="'.$appointment["id"].'">
+                            <p class="text-lg font-semibold text-purple-900">'.$appointment["doctor_name"].'</p>
+                            <p class="text-sm text-purple-700">Date: '.$appointment["date"].'</p>
+                            <p class="text-sm text-purple-700">Time: '.$appointment["time"].'</p>
+                            <p class="text-sm text-purple-700">Status: '.$appointment["status"].'</p>
+                            <!-- -->
+                            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition-all duration-200">Cancel Appointment</button>
+                            <!-- -->
+                        </form>
+                        ' ;         
+                    }
+                }
+             ?>
+            
             <!-- Add more appointment cards as needed -->
         </div>
         
@@ -181,19 +222,32 @@
                 <!-- Specialization Selection -->
                 <div>
                     <label class="block font-semibold text-gray-700 mb-2">Provider Specialization</label>
-                    <select name="provider_specialization" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-                        <option value="general">General Practitioner</option>
-                        <option value="cardiologist">Cardiologist</option>
+                    <select id = 'select1' name="provider_specialization" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                        <!-- <option value="general">General Practitioner</option>
+                        <option value="cardiologist">Cardiologist</option> -->
                         <!-- More specializations as needed -->
+                        <?php
+                            if (!empty($providers)) {
+                                foreach ($providers as $provider) {
+                                    echo '<option value="'.$provider['specialization'].'">'.$provider['specialization'].'</option>';
+                                } 
+                            }
+                        ?>
                     </select>
                 </div>
                 
                 <!-- Provider Selection -->
                 <div>
                     <label class="block font-semibold text-gray-700 mb-2">Select Provider</label>
-                    <select name="provider" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-                        <option value="dr_smith">Dr. Smith</option>
-                        <option value="dr_adams">Dr. Adams</option>
+                    <select id = 'select2' name="provider" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                        <!-- <option value="dr_smith">Dr. Smith</option> -->
+                        <?php
+                            if (!empty($providers)) {
+                                foreach ($providers as $provider) {
+                                    echo '<option value="'.$provider['name'].'">'.$provider['name'].'</option>';
+                                }
+                            }
+                        ?>
                     </select>
                 </div>
                 
@@ -201,6 +255,24 @@
                 <div class="md:col-span-2">
                     <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg shadow-lg hover:bg-blue-600 transition-all duration-200">Book Appointment</button>
                 </div>
+                <script>
+                    function synchronizeSelectTags() {
+                        const select1 = document.getElementById('select1');
+                        const select2 = document.getElementById('select2');
+
+                        select1.addEventListener('change', () => {
+                            select2.selectedIndex = select1.selectedIndex;
+                        });
+
+                        select2.addEventListener('change', () => {
+                            select1.selectedIndex = select2.selectedIndex;
+                        });
+                    }
+
+                    // Call the function to initialize the synchronization
+                    synchronizeSelectTags();
+
+                </script>
             </form>
         </div>
     </div>
@@ -317,8 +389,20 @@
             <!-- Messages List -->
             <div class="mb-6">
                 <ul class="list-disc pl-5 text-yellow-800">
-                    <li><strong>Dr. Lee:</strong> Your blood test results are ready.</li>
-                    <li><strong>Nurse Sarah:</strong> Please remember to schedule your follow-up appointment.</li>
+                    <!-- <li><strong>Dr. Lee:</strong> Your blood test results are ready.</li>
+                    <li><strong>Nurse Sarah:</strong> Please remember to schedule your follow-up appointment.</li> -->
+                    <?php
+                        $stmt = $db->prepare("SELECT * FROM messages WHERE recipient = :user");
+                        $stmt->bindParam(':user', $_SESSION['user']);
+                        $stmt->execute();
+                        $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        if (!empty($messages)) {
+                            foreach ($messages as $message) {
+                                echo "<li><strong>" . $message["sender"].  ":</strong>" . $message["message"].  "</li>";
+                            }
+                        }
+
+                    ?>
                 </ul>
             </div>
 
@@ -329,8 +413,15 @@
                     <div>
                         <label class="block font-semibold text-gray-700 mb-2">To</label>
                         <select name="recipient" class="w-full p-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none" required>
-                            <option value="dr_lee">Dr. Lee</option>
-                            <option value="nurse_sarah">Nurse Sarah</option>
+                            <!-- <option value="dr_lee">Dr. Lee</option>
+                            <option value="nurse_sarah">Nurse Sarah</option> -->
+                            <?php
+                            if (!empty($providers)) {
+                                foreach ($providers as $provider) {
+                                    echo '<option value="'.$provider['name'].'">'.$provider['name'].'</option>';
+                                } 
+                            }
+                            ?>
                         </select>
                     </div>
                     <div>
@@ -338,17 +429,19 @@
                         <textarea name="message" rows="4" class="w-full p-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none" required></textarea>
                     </div>
                     <div>
+                        <input type="hidden" name = "sender" value = "<?php echo $_SESSION['user'];?>">
+                        <input type="hidden" name = "return" value = "patient_dashboard.php">
                         <button type="submit" class="w-full bg-yellow-500 text-white py-3 rounded-lg shadow-lg hover:bg-yellow-600 transition-all duration-200">Send Message</button>
                     </div>
                 </form>
-            </div>
+            </>
         </div>
 
-        <!-- Video Calls Section -->
+        <!-- Video Calls Section 
         <div id="video-calls-section" class="bg-gradient-to-r from-purple-100 to-purple-50 p-6 rounded-xl shadow-lg">
             <h2 class="text-2xl font-semibold text-purple-900 mb-4">Video Calls</h2>
 
-            <!-- Upcoming Video Calls -->
+           
             <div class="mb-6">
                 <ul class="list-disc pl-5 text-purple-800">
                     <li><strong>Dr. Johnson:</strong> 2024-09-10, 11:00 AM</li>
@@ -356,7 +449,6 @@
                 </ul>
             </div>
 
-            <!-- Schedule a Video Call -->
             <div class="bg-white p-8 rounded-lg shadow-xl">
                 <h1 class="text-2xl font-bold text-purple-900 mb-6">Schedule a Video Call</h1>
                 <form action="schedule-video-call.php" method="POST">
@@ -376,7 +468,7 @@
                 
                 </form>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 

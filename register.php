@@ -1,96 +1,73 @@
 <?php
-header('Content-Type: application/json');
+include_once "db.php";
+session_start();
 
-// Example database connection using MySQLi
-$servername = "localhost";
-$username = "root"; // Your MySQL username
-$password = ""; // Your MySQL password
-$dbname = "ipash_system"; // Your database name
+$name = $_POST['name'];
+$email = $_POST['email'];
+$phone = $_POST['phone'];
+$password = $_POST['password'];
+$specialization = $_POST['specialization'] ?? null;
+$table = $_POST['table'];
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
-if ($conn->connect_error) {
-    die(json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]));
-}
+//check if existing
+$tables = ["patients", "providers", "admins"];
+$exist = false;
 
-// Get the raw POST data from the request body
-$data = json_decode(file_get_contents('php://input'), true);
-
-// Check if the required data is provided
-if (!isset($data['user_type'], $data['name'], $data['email'], $data['phone'], $data['password'])) {
-    echo json_encode(['error' => 'Missing required fields']);
-    exit();
-}
-
-// Extract user data from the incoming request
-$user_type = $data['user_type'];
-$name = $data['name'];
-$email = $data['email'];
-$phone = $data['phone'];
-$password = $data['password'];
-
-$hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-// Check for existing user (by email) in the respective user table
-if ($user_type == 'patient') {
-    $query = "SELECT COUNT(*) FROM patients WHERE email = ?";
-} elseif ($user_type == 'provider') {
-    $query = "SELECT COUNT(*) FROM providers WHERE email = ?";
-    // Check if specialization is provided for providers
-    if (!isset($data['specialization'])) {
-        echo json_encode(['error' => 'Specialization is required for providers']);
-        exit();
+foreach ($tables as $index => $tb) {
+    $stmt = $db->prepare("SELECT * FROM $tb WHERE name = :name");
+    $stmt->bindParam(':name', $name);
+    $stmt->execute();
+    if ($stmt->rowCount() > 0) {
+        $exist = true;
+        break;
     }
-} elseif ($user_type == 'admin') {
-    $query = "SELECT COUNT(*) FROM admins WHERE email = ?";
-} else {
-    echo json_encode(['error' => 'Invalid user type']);
+}
+if ($exist) {
+    echo "Username taken";
     exit();
 }
+//
 
-// Prepare the query to check if email already exists
-$stmt = $conn->prepare($query);
-$stmt->bind_param('s', $email);
-$stmt->execute();
-$stmt->bind_result($email_count);
-$stmt->fetch();
-$stmt->close();
-
-// If email already exists, return an error
-if ($email_count > 0) {
-    echo json_encode(['error' => 'Email already exists']);
-    exit();
+$sql = "INSERT INTO $table (name, email, phone, password";
+if ($table === 'providers') {
+    $sql .= ", specialization";
 }
-
-// Prepare the insert query based on user type
-if ($user_type == 'patient') {
-    $query = "INSERT INTO patients (name, email, phone, password) VALUES (?, ?, ?, ?)";
-} elseif ($user_type == 'provider') {
-    $specialization = $data['specialization'];
-    $query = "INSERT INTO providers (name, email, phone, specialization, password) VALUES (?, ?, ?, ?, ?)";
-} elseif ($user_type == 'admin') {
-    $query = "INSERT INTO admins (name, email, phone, password) VALUES (?, ?, ?, ?)";
+$sql .= ") VALUES (?, ?, ?, ?";
+if ($table === 'providers') {
+    $sql .= ", ?";
 }
+$sql .= ")";
 
-// Prepare and execute the query
-$stmt = $conn->prepare($query);
+$stmt = $db->prepare($sql);
 
-if ($user_type == 'provider') {
-    $stmt->bind_param('sssss', $name, $email, $phone, $specialization, $hashed_password);
-} else {
-    $stmt->bind_param('ssss', $name, $email, $phone, $hashed_password);
+$stmt->bindParam(1, $name);
+$stmt->bindParam(2, $email);
+$stmt->bindParam(3, $phone);
+$stmt->bindParam(4, $password);
+
+if ($table === 'providers') {
+    $stmt->bindParam(5, $specialization);
 }
 
 if ($stmt->execute()) {
-    // Registration successful
-    echo json_encode(['message' => ucfirst($user_type) . ' registered successfully.']);
-} else {
-    // Error occurred
-    echo json_encode(['error' => 'Failed to register user. ' . $stmt->error]);
-}
+    $_SESSION['user'] = $user;
+    $_SESSION['email']= $email;
+    $_SESSION['phone'] = $phone;
+    $_SESSION['as'] = $table;
 
-$stmt->close();
-$conn->close();
+    switch ($table) {
+        case "patients":
+            header("Location: patient_dashboard.php");
+            break;
+        case "providers":
+            header("Location: provider_dashboard.php");
+            break;
+        case "admins":
+            header("Location: admin_dashboard.php");
+            break;
+    }
+} else {
+    echo "Registration failed. Please try again.";
+}
 ?>

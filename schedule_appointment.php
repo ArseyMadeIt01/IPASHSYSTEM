@@ -1,38 +1,26 @@
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = ""; // replace with your MySQL password
-$dbname = "ipash_system";
+session_start();
+include_once "db.php";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Handling the form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $appointment_date = $_POST['appointment_date'];
     $appointment_time = $_POST['appointment_time'];
     $provider_specialization = $_POST['provider_specialization'];
     $provider = $_POST['provider'];
 
-    // Prepare and bind
-    $stmt = $conn->prepare("INSERT INTO appointments (appointment_date, appointment_time, provider_specialization, provider) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $appointment_date, $appointment_time, $provider_specialization, $provider);
+    $sql = "INSERT INTO appointments (appointment_date, appointment_time, provider_specialization, provider, patient) VALUES (?, ?, ?, ?, ?)";
 
-    // Execute the query
+    $stmt = $db->prepare($sql);
+    $stmt->bindparam(1, $appointment_date);
+    $stmt->bindparam(2, $appointment_time);
+    $stmt->bindparam(3, $provider_specialization);
+    $stmt->bindparam(4, $provider);
+    $stmt->bindparam(5, $_SESSION['user']);
+
     if ($stmt->execute()) {
-        echo "<script>alert('Appointment booked successfully!'); window.location.href='patient-dashboard.html';</script>";
+        header("Location: patient_dashboard.php");
     } else {
-        echo "<script>alert('Error: Could not book the appointment.'); window.location.href='patient-dashboard.html';</script>";
+        echo "Error: Could not book the appointment.";
     }
-
-    // Close the statement and connection
-    $stmt->close();
-    $conn->close();
 }
 ?>
